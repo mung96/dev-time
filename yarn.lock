@@ -1103,6 +1103,54 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/eslint-plugin-query@npm:^5.91.2":
+  version: 5.91.2
+  resolution: "@tanstack/eslint-plugin-query@npm:5.91.2"
+  dependencies:
+    "@typescript-eslint/utils": ^8.44.1
+  peerDependencies:
+    eslint: ^8.57.0 || ^9.0.0
+  checksum: 39490e2e3e57b6dc656d3284b70fd71d24f2757cb6932df245d9e19616f95ff372998c98013c14f4d78d094b6cd91b9fb6d5135c5e40dffd370ad49aeaad71c0
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-core@npm:5.90.11":
+  version: 5.90.11
+  resolution: "@tanstack/query-core@npm:5.90.11"
+  checksum: 4f8806c3d73e7d62bd66f43a175c45e0a3f099bec531aa40a4d9488e16b71b65d8c63b21955970fc780f0135d95ba515f0230832d664e17d93695db13510e015
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-devtools@npm:5.91.1":
+  version: 5.91.1
+  resolution: "@tanstack/query-devtools@npm:5.91.1"
+  checksum: 799aaac422311748026704f887a467f5ad7233e7183b458c32a8f2dc0018350c6c9734cbd146c3cc947e42528a63fa0fb89a8c8f5a40466319f7527f1d4ffbb6
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query-devtools@npm:^5.91.1":
+  version: 5.91.1
+  resolution: "@tanstack/react-query-devtools@npm:5.91.1"
+  dependencies:
+    "@tanstack/query-devtools": 5.91.1
+  peerDependencies:
+    "@tanstack/react-query": ^5.90.10
+    react: ^18 || ^19
+  checksum: c9b6254057aa748a32ee8ce8ac0d8444acdcdc218ad565249e579c844aed929f70772d3e04686d2b44d4847edaeb32f08d0b4842493ef34dcf0f00bacd3ea6ca
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.90.11":
+  version: 5.90.11
+  resolution: "@tanstack/react-query@npm:5.90.11"
+  dependencies:
+    "@tanstack/query-core": 5.90.11
+  peerDependencies:
+    react: ^18 || ^19
+  checksum: 95283fbe4d74f5defd7f92d35ce0bf208f6f4f6989dc80564baf4f771facc748e6d42169bed5939c0adf4622dafc48c547e58f38d7bec97936d13b138cb30dfe
+  languageName: node
+  linkType: hard
+
 "@tybys/wasm-util@npm:^0.10.0, @tybys/wasm-util@npm:^0.10.1":
   version: 0.10.1
   resolution: "@tybys/wasm-util@npm:0.10.1"
@@ -1285,7 +1333,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:8.48.1":
+"@typescript-eslint/utils@npm:8.48.1, @typescript-eslint/utils@npm:^8.44.1":
   version: 8.48.1
   resolution: "@typescript-eslint/utils@npm:8.48.1"
   dependencies:
@@ -2568,6 +2616,9 @@ __metadata:
     "@hookform/devtools": ^4.4.0
     "@hookform/resolvers": ^5.2.2
     "@tailwindcss/postcss": ^4
+    "@tanstack/eslint-plugin-query": ^5.91.2
+    "@tanstack/react-query": ^5.90.11
+    "@tanstack/react-query-devtools": ^5.91.1
     "@types/node": ^20
     "@types/react": ^19
     "@types/react-dom": ^19
