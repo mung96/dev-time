@@ -34,8 +34,8 @@
   --text-heading: 24px;
   --text-heading--line-height: 30px;
 
-  --text-title: 24px;
-  --text-title--line-height: 30px;
+  --text-title: 20px;
+  --text-title--line-height: 24px;
 
   --text-subtitle: 18px;
   --text-subtitle--line-height: 22px;
@@ -56,5 +56,9 @@
 @media (prefers-color-scheme: dark) {
 }
 
+html,
+root,
 body {
+  height: 100%;
+  min-height: 100%;
 }
