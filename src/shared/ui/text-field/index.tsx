@@ -5,8 +5,8 @@ import { ReactNode } from "react";
 
 interface TextFieldProps extends React.ComponentProps<"input"> {
   label: string;
-  button: ReactNode;
-  helperText: ReactNode;
+  button?: ReactNode;
+  helperText?: ReactNode;
   className?: string;
 }
 export const TextField = ({
