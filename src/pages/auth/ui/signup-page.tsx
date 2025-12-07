@@ -16,7 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { checkNickname } from "@pages/auth/api/check-nickname";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { signup } from "@pages/auth/api/signup";
 import { DevTool } from "@hookform/devtools";
 import { useRouter } from "next/navigation";
@@ -28,7 +28,7 @@ export const SignupPage = () => {
     setError,
     handleSubmit,
     control,
-    formState: { errors, touchedFields },
+    formState: { errors, touchedFields, isValid, isSubmitting },
   } = useForm<SignUpFormValues>({
     defaultValues: {
       email: "",
@@ -46,6 +46,9 @@ export const SignupPage = () => {
     useState(false);
 
   const [isChecked, setIsChecked] = useState(false);
+
+  const isFormValid =
+    isChecked && isValidDuplicateEmail && isValidDuplicateNickname && isValid;
 
   return (
     <div className="flex h-full">
@@ -70,10 +73,9 @@ export const SignupPage = () => {
             className="mt-[140px] w-105 flex flex-col gap-6"
             onSubmit={(e) => {
               e.preventDefault();
-              handleSubmit((data) => {
-                signup(data).then(() => {
-                  router.replace(PATH.LOGIN);
-                });
+              handleSubmit(async (data) => {
+                await signup(data);
+                router.replace(PATH.LOGIN);
               })();
             }}
           >
@@ -234,14 +236,17 @@ export const SignupPage = () => {
                     checked={isChecked}
                     onChange={(e) => setIsChecked(e.target.checked)}
                   />
-                  <p>{String(isChecked)}</p>
                 </div>
                 <div className="bg-gray-50 h-[110px] overflow-y-scroll py-3 px-4">
                   {TERMS_OF_SERVICE_CONTENT}
                 </div>
               </section>
             </fieldset>
-            <Button priority={"primary"} type="submit">
+            <Button
+              priority={"primary"}
+              type="submit"
+              disabled={!isFormValid || isSubmitting}
+            >
               회원가입
             </Button>
             <DevTool control={control} />
