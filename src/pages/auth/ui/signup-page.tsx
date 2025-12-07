@@ -8,6 +8,7 @@ import {
 } from "@pages/auth/model/signup-form-values.schema";
 import { PATH } from "@shared/routes";
 import { Button } from "@shared/ui";
+import { Checkbox } from "@shared/ui/checkbox";
 import { TextField } from "@shared/ui/text-field";
 import { HelperText } from "@shared/ui/text-field/helper-text";
 import { TextFieldButton } from "@shared/ui/text-field/text-field-button";
@@ -44,9 +45,8 @@ export const SignupPage = () => {
   const [isValidDuplicateNickname, setIsValidDuplicateNickname] =
     useState(false);
 
-  useEffect(() => {
-    console.log(errors.email);
-  }, [errors.email]);
+  const [isChecked, setIsChecked] = useState(false);
+
   return (
     <div className="flex h-full">
       <div className="flex-1 bg-primary flex items-center justify-center">
@@ -230,7 +230,11 @@ export const SignupPage = () => {
               <section>
                 <div className="flex justify-between">
                   <span>이용약관</span>
-                  <div>체크박스</div>
+                  <Checkbox
+                    checked={isChecked}
+                    onChange={(e) => setIsChecked(e.target.checked)}
+                  />
+                  <p>{String(isChecked)}</p>
                 </div>
                 <div className="bg-gray-50 h-[110px] overflow-y-scroll py-3 px-4">
                   {TERMS_OF_SERVICE_CONTENT}
