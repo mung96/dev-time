@@ -14,6 +14,8 @@ import { TextFieldButton } from "@shared/ui/text-field/text-field-button";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
+import { checkNickname } from "@pages/auth/api/check-nickname";
+import { useState } from "react";
 
 export const SignupPage = () => {
   const {
@@ -31,6 +33,10 @@ export const SignupPage = () => {
     resolver: zodResolver(SignUpFormValuesSchema),
     mode: "onTouched",
   });
+
+  const [isValidDuplicateEmail, setIsValidDuplicateEmail] = useState(false);
+  const [isValidDuplicateNickname, setIsValidDuplicateNickname] =
+    useState(false);
   return (
     <div className="flex h-full">
       <div className="flex-1 bg-primary flex items-center justify-center">
@@ -64,8 +70,8 @@ export const SignupPage = () => {
                     onClick={() => {
                       const email = getValues("email");
                       checkEmail(email)
-                        .then((response) => {
-                          console.dir("response", response);
+                        .then(() => {
+                          setIsValidDuplicateEmail(true);
                         })
                         .catch((error) => {
                           if (error instanceof ApiError) {
@@ -83,20 +89,61 @@ export const SignupPage = () => {
                   </TextFieldButton>
                 }
                 helperText={
-                  <HelperText state={"error"}>
-                    {errors.email?.message}
-                  </HelperText>
+                  <>
+                    {errors.email?.message && (
+                      <HelperText state={"error"}>
+                        {errors.email?.message}
+                      </HelperText>
+                    )}
+                    {isValidDuplicateEmail && (
+                      <HelperText state={"success"}>
+                        사용 가능한 이메일입니다.
+                      </HelperText>
+                    )}
+                  </>
                 }
               />
               <TextField
                 label={"닉네임"}
                 placeholder="닉네임을 입력해 주세요."
                 {...register("nickname")}
-                button={<TextFieldButton>중복 확인</TextFieldButton>}
+                button={
+                  <TextFieldButton
+                    type="button"
+                    onClick={() => {
+                      const nickname = getValues("nickname");
+                      checkNickname(nickname)
+                        .then(() => {
+                          setIsValidDuplicateNickname(true);
+                        })
+                        .catch((error) => {
+                          if (error instanceof ApiError) {
+                            if (error.status === HttpStatus.BAD_REQUEST) {
+                              setError("nickname", {
+                                type: "nickname",
+                                message: error.message,
+                              });
+                            }
+                          }
+                        });
+                    }}
+                  >
+                    중복 확인
+                  </TextFieldButton>
+                }
                 helperText={
-                  <HelperText state={"error"}>
-                    {errors.nickname?.message}
-                  </HelperText>
+                  <>
+                    {errors.email?.message && (
+                      <HelperText state={"error"}>
+                        {errors.nickname?.message}
+                      </HelperText>
+                    )}
+                    {isValidDuplicateNickname && (
+                      <HelperText state={"success"}>
+                        사용 가능한 닉네임입니다.
+                      </HelperText>
+                    )}
+                  </>
                 }
               />
               <TextField
