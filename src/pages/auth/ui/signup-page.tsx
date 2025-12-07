@@ -15,7 +15,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { checkNickname } from "@pages/auth/api/check-nickname";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signup } from "@pages/auth/api/signup";
 import { DevTool } from "@hookform/devtools";
 import { useRouter } from "next/navigation";
@@ -27,7 +27,7 @@ export const SignupPage = () => {
     setError,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, touchedFields },
   } = useForm<SignUpFormValues>({
     defaultValues: {
       email: "",
@@ -43,6 +43,10 @@ export const SignupPage = () => {
   const [isValidDuplicateEmail, setIsValidDuplicateEmail] = useState(false);
   const [isValidDuplicateNickname, setIsValidDuplicateNickname] =
     useState(false);
+
+  useEffect(() => {
+    console.log(errors.email);
+  }, [errors.email]);
   return (
     <div className="flex h-full">
       <div className="flex-1 bg-primary flex items-center justify-center">
@@ -84,17 +88,28 @@ export const SignupPage = () => {
                 button={
                   <TextFieldButton
                     type="button"
+                    disabled={
+                      !touchedFields.email ||
+                      errors.email?.type === "invalid_format"
+                    }
                     onClick={() => {
                       const email = getValues("email");
                       checkEmail(email)
-                        .then(() => {
-                          setIsValidDuplicateEmail(true);
+                        .then((response) => {
+                          if (response.available) {
+                            setIsValidDuplicateEmail(true);
+                          } else {
+                            setError("email", {
+                              type: "duplicate",
+                              message: response.message,
+                            });
+                          }
                         })
                         .catch((error) => {
                           if (error instanceof ApiError) {
                             if (error.status === HttpStatus.BAD_REQUEST) {
                               setError("email", {
-                                type: "manual",
+                                type: "invalid_format",
                                 message: error.message,
                               });
                             }
@@ -107,15 +122,20 @@ export const SignupPage = () => {
                 }
                 helperText={
                   <>
-                    {errors.email?.message && (
-                      <HelperText state={"error"}>
-                        {errors.email?.message}
-                      </HelperText>
-                    )}
-                    {isValidDuplicateEmail && (
-                      <HelperText state={"success"}>
-                        사용 가능한 이메일입니다.
-                      </HelperText>
+                    {!!touchedFields.email ? (
+                      !!errors.email?.message ? (
+                        <HelperText state={"error"}>
+                          {errors.email?.message}
+                        </HelperText>
+                      ) : (
+                        isValidDuplicateEmail && (
+                          <HelperText state={"success"}>
+                            사용 가능한 이메일입니다.
+                          </HelperText>
+                        )
+                      )
+                    ) : (
+                      <></>
                     )}
                   </>
                 }
@@ -205,7 +225,7 @@ export const SignupPage = () => {
               {" "}
               회원가입
             </Button>
-            <DevTool control={control} /> {/* set up the dev tool */}
+            <DevTool control={control} />
           </form>
 
           <p>

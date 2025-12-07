@@ -16,9 +16,9 @@ export const TextFieldButton = ({
         "before:content-[''] before:absolute before:inset-0 before:bg-black/10 before:opacity-0 before:rounded-sm before:transition-opacity", //hover, active시 사용
         [
           "bg-primary/10", // 기본
-          "disabled:bg-gray-400 disabled:text-gray-300", // disabled
-          "hover:before:opacity-100", // hover
-          "active:before:opacity-100", // active
+          "disabled:bg-gray-400 disabled:text-gray-300 disabled:cursor-not-allowed", // disabled
+          "hover:enabled:before:opacity-100", // hover
+          "active:enabled:before:opacity-100", // active
           "focus:ring-1 focus:ring-fuchsia focus:border focus:border-white", // focus
         ],
         className
