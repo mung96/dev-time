@@ -150,17 +150,28 @@ export const SignupPage = () => {
                 button={
                   <TextFieldButton
                     type="button"
+                    disabled={
+                      !touchedFields.nickname ||
+                      errors.nickname?.type === "invalid_format"
+                    }
                     onClick={() => {
                       const nickname = getValues("nickname");
                       checkNickname(nickname)
-                        .then(() => {
-                          setIsValidDuplicateNickname(true);
+                        .then((response) => {
+                          if (response.available) {
+                            setIsValidDuplicateNickname(true);
+                          } else {
+                            setError("nickname", {
+                              type: "duplicate",
+                              message: response.message,
+                            });
+                          }
                         })
                         .catch((error) => {
                           if (error instanceof ApiError) {
                             if (error.status === HttpStatus.BAD_REQUEST) {
                               setError("nickname", {
-                                type: "nickname",
+                                type: "invalid_format",
                                 message: error.message,
                               });
                             }
@@ -173,15 +184,20 @@ export const SignupPage = () => {
                 }
                 helperText={
                   <>
-                    {errors.nickname?.message && (
-                      <HelperText state={"error"}>
-                        {errors.nickname?.message}
-                      </HelperText>
-                    )}
-                    {isValidDuplicateNickname && (
-                      <HelperText state={"success"}>
-                        사용 가능한 닉네임입니다.
-                      </HelperText>
+                    {!!touchedFields.nickname ? (
+                      !!errors.nickname?.message ? (
+                        <HelperText state={"error"}>
+                          {errors.nickname?.message}
+                        </HelperText>
+                      ) : (
+                        isValidDuplicateNickname && (
+                          <HelperText state={"success"}>
+                            사용 가능한 닉네임입니다.
+                          </HelperText>
+                        )
+                      )
+                    ) : (
+                      <></>
                     )}
                   </>
                 }
@@ -222,7 +238,6 @@ export const SignupPage = () => {
               </section>
             </fieldset>
             <Button priority={"primary"} type="submit">
-              {" "}
               회원가입
             </Button>
             <DevTool control={control} />
