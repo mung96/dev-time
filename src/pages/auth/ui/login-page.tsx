@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { DevTool } from "@hookform/devtools";
 import { LoginFormValues } from "@pages/auth/model/login-form-values.schema";
+import { apiRequester } from "@shared/api";
 export const LoginPage = () => {
   const {
     register,
@@ -32,7 +33,21 @@ export const LoginPage = () => {
           className="mt-[140px] w-105 flex flex-col gap-6"
           onSubmit={(e) => {
             e.preventDefault();
-            handleSubmit(async (data) => {})();
+            handleSubmit(async (data) => {
+              const response = await apiRequester<{
+                success: boolean;
+                available: boolean;
+                message: string;
+                accessToken: string;
+                refreshToken: string;
+                isFirstLogin: boolean;
+                isDuplicateLogin: boolean;
+              }>(`/api/login`, {
+                method: "POST",
+                body: JSON.stringify(data),
+              });
+              console.log("client", response);
+            })();
           }}
         >
           <h2 className="text-heading text-primary text-center">회원가입</h2>
