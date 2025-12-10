@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   const queryString = req.nextUrl.search;
 
   const response = await fetch(
-    `${API_SERVER_URL}/api/signup/check-nickname${queryString}`,
+    `${API_SERVER_URL}/api/signup/check-email${queryString}`,
     {
       method: "GET",
       headers: { "Content-Type": "application/json" },
