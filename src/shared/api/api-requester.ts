@@ -1,14 +1,10 @@
-const API_SERVER_URL = process.env.NEXT_PUBLIC_API_SERVER_URL;
-
 export const apiRequester = async <T = unknown>(
   endpoint: string,
   options: RequestInit
 ): Promise<T> => {
-  const apiUrl = API_SERVER_URL + endpoint;
-
   const { headers, ...restOptions } = options;
 
-  const response = await fetch(apiUrl, {
+  const response = await fetch(endpoint, {
     headers: {
       "Content-Type": "application/json",
       ...headers,
@@ -19,7 +15,6 @@ export const apiRequester = async <T = unknown>(
   if (!response.ok) {
     //TODO: 서비스 에러말고, 기타 에러 처리해야함
     const errorData = await response.json();
-    console.log("errorData", errorData);
 
     throw new ApiError(errorData);
   }
