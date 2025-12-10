@@ -49,8 +49,11 @@ export const LoginPage = () => {
                 method: "POST",
                 body: JSON.stringify(data),
               });
+              console.log(response);
               if (response.isFirstLogin) {
                 router.push(PATH.PROFILE_CREATE);
+              } else {
+                router.push(PATH.TIMER);
               }
             })();
           }}

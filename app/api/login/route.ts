@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { accessToken, refreshToken, ...loginInfo } = await response.json();
-  const res = NextResponse.json({ loginInfo });
+  const res = NextResponse.json({ ...loginInfo });
 
   res.cookies.set(ACCESS_TOKEN_STORAGE_KEY, accessToken, {
     httpOnly: true,

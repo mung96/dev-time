@@ -8,4 +8,7 @@ export const PATH = {
 
   //member
   PROFILE_CREATE: "/profile/new",
+
+  //타이머
+  TIMER: "/timer",
 };
