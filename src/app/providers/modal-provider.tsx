@@ -1,5 +1,6 @@
 "use client";
 
+import { LoginFailModal } from "@pages/auth/ui/login-fail-modal";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -12,7 +13,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
   }, []);
   return (
     <>
-      {modalRoot ? createPortal(<p>모달 프로바이더 체크</p>, modalRoot) : null}
+      {modalRoot ? createPortal(<LoginFailModal />, modalRoot) : null}
       {children}
     </>
   );

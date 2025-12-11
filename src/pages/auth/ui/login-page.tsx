@@ -7,17 +7,19 @@ import { TextField } from "@shared/ui/text-field";
 import { HelperText } from "@shared/ui/text-field/helper-text";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { DevTool } from "@hookform/devtools";
 import { LoginFormValues } from "@pages/auth/model/login-form-values.schema";
 import { useRouter } from "next/navigation";
 import { login } from "@pages/auth/api/login";
+import {
+  useLoginFailModal,
+  useOpenLoginFailModal,
+} from "@pages/auth/model/use-login-fail-modal-store";
 export const LoginPage = () => {
   const {
     register,
 
     handleSubmit,
-    control,
-    formState: { errors },
+    formState: { errors, isValid, isSubmitting },
   } = useForm<LoginFormValues>({
     defaultValues: {
       email: "",
@@ -28,6 +30,7 @@ export const LoginPage = () => {
   });
 
   const router = useRouter();
+  const { open: openLoginFailModal } = useOpenLoginFailModal();
 
   return (
     <div className="flex-1 flex justify-center w-full">
@@ -37,14 +40,15 @@ export const LoginPage = () => {
           onSubmit={(e) => {
             e.preventDefault();
             handleSubmit(async (data) => {
-              const response = await login({
+              await login({
                 ...data,
-              });
-              if (response.isFirstLogin) {
-                router.push(PATH.PROFILE_CREATE);
-              } else {
-                router.push(PATH.TIMER);
-              }
+              })
+                .then(({ isFirstLogin }) => {
+                  router.push(isFirstLogin ? PATH.PROFILE_CREATE : PATH.TIMER);
+                })
+                .catch(() => {
+                  openLoginFailModal();
+                });
             })();
           }}
         >
@@ -73,7 +77,11 @@ export const LoginPage = () => {
               isError={!!errors.password?.message}
             />
           </fieldset>
-          <Button priority={"primary"} type="submit">
+          <Button
+            priority={"primary"}
+            type="submit"
+            disabled={!isValid || isSubmitting}
+          >
             로그인
           </Button>
         </form>
