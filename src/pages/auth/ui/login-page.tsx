@@ -10,10 +10,7 @@ import { useForm } from "react-hook-form";
 import { LoginFormValues } from "@pages/auth/model/login-form-values.schema";
 import { useRouter } from "next/navigation";
 import { login } from "@pages/auth/api/login";
-import {
-  useLoginFailModal,
-  useOpenLoginFailModal,
-} from "@pages/auth/model/use-login-fail-modal-store";
+import { useOpenLoginFailModal } from "@pages/auth/model/use-login-fail-modal-store";
 import { useOpenLoginDuplicateModal } from "@pages/auth/model/use-login-duplicate-modal-store";
 export const LoginPage = () => {
   const {
@@ -45,14 +42,16 @@ export const LoginPage = () => {
                 ...data,
               })
                 .then(({ isFirstLogin, isDuplicateLogin }) => {
+                  const redirectPath = isFirstLogin
+                    ? PATH.PROFILE_CREATE
+                    : PATH.TIMER;
+
                   if (isDuplicateLogin) {
                     return openLoginDuplicateModal(() => {
-                      router.push(
-                        isFirstLogin ? PATH.PROFILE_CREATE : PATH.TIMER
-                      );
+                      router.push(redirectPath);
                     });
                   }
-                  router.push(isFirstLogin ? PATH.PROFILE_CREATE : PATH.TIMER);
+                  router.push(redirectPath);
                 })
                 .catch(() => {
                   openLoginFailModal();
