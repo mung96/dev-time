@@ -16,7 +16,7 @@ export const Dialog = ({ children, className }: DialogProps) => {
         top: 0,
       });
     }
-  }, [dialogRef]);
+  }, []);
 
   //TODO: 모달 배경 스크롤 방지 로직 추가
 
