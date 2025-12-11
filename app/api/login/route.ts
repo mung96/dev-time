@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   if (!response.ok) {
     const { error } = await response.json();
-    return NextResponse.json({ ...error });
+    return NextResponse.json({ ...error }, { status: response.status });
   }
 
   const { accessToken, refreshToken, ...loginInfo } = await response.json();
