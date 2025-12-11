@@ -14,6 +14,7 @@ import {
   useLoginFailModal,
   useOpenLoginFailModal,
 } from "@pages/auth/model/use-login-fail-modal-store";
+import { useOpenLoginDuplicateModal } from "@pages/auth/model/use-login-duplicate-modal-store";
 export const LoginPage = () => {
   const {
     register,
@@ -31,7 +32,7 @@ export const LoginPage = () => {
 
   const router = useRouter();
   const { open: openLoginFailModal } = useOpenLoginFailModal();
-
+  const { open: openLoginDuplicateModal } = useOpenLoginDuplicateModal();
   return (
     <div className="flex-1 flex justify-center w-full">
       <div className="flex flex-col items-center gap-6">
@@ -43,7 +44,14 @@ export const LoginPage = () => {
               await login({
                 ...data,
               })
-                .then(({ isFirstLogin }) => {
+                .then(({ isFirstLogin, isDuplicateLogin }) => {
+                  if (isDuplicateLogin) {
+                    return openLoginDuplicateModal(() => {
+                      router.push(
+                        isFirstLogin ? PATH.PROFILE_CREATE : PATH.TIMER
+                      );
+                    });
+                  }
                   router.push(isFirstLogin ? PATH.PROFILE_CREATE : PATH.TIMER);
                 })
                 .catch(() => {
