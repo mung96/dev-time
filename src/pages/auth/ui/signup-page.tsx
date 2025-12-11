@@ -261,7 +261,6 @@ export const SignupPage = () => {
             >
               회원가입
             </Button>
-            <DevTool control={control} />
           </form>
 
           <p>

@@ -76,9 +76,6 @@ export const LoginPage = () => {
           <Button priority={"primary"} type="submit">
             로그인
           </Button>
-          {process.env.NODE_ENV === "development" && (
-            <DevTool control={control} />
-          )}
         </form>
 
         <p>
