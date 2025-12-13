@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
   const { accessToken, refreshToken, ...loginInfo } = await response.json();
   const res = NextResponse.json({ ...loginInfo });
 
+  // 토큰을 쿠키에 세팅
   const cookieStore = await cookies();
   setAccessTokenCookie(cookieStore, accessToken);
   setRefreshTokenCookie(cookieStore, refreshToken);
