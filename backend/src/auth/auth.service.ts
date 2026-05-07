@@ -8,6 +8,7 @@ import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { Member } from 'src/member/member.entity';
 import { MoreThan } from 'typeorm';
+import { MemberSession } from 'src/member/member-session.entity';
 
 @Injectable()
 export class AuthService {
@@ -123,5 +124,30 @@ export class AuthService {
     await this.memberSessionRepository.softDelete(memberSessionIds);
   }
 
-  async refreshAccessToken() {}
+  async refreshAccessToken({
+    refreshToken,
+  }: {
+    refreshToken: string;
+  }): Promise<string> {
+    const memberSessions = await this.memberSessionRepository.find({
+      where: { expiredAt: MoreThan(new Date()) },
+      relations: { member: true },
+    });
+
+    let curMemberSession: MemberSession | null = null;
+    for (const memberSession of memberSessions) {
+      if (await compare(refreshToken, memberSession.refreshToken)) {
+        curMemberSession = memberSession;
+        break;
+      }
+    }
+    if (!curMemberSession) throw new Error('refreshToken 이상');
+
+    const payload = { sub: curMemberSession.member.id };
+
+    const newAccessToken = await this.jwtService.signAsync(payload, {
+      expiresIn: this.accessTokenExpiredSec,
+    });
+    return newAccessToken;
+  }
 }
