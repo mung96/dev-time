@@ -3,7 +3,6 @@ import { AuthService } from './auth.service';
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -18,6 +17,7 @@ import { RefreshAccessTokenRequest } from 'src/auth/refresh-access-token-request
 import { RefreshAccessTokenResponse } from 'src/auth/refresh-access-token-response';
 import { AuthGuard } from 'src/auth/auth.guard';
 import type { Request } from 'express';
+import { LogoutRequest } from 'src/auth/logout-request';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -37,20 +37,20 @@ export class AuthController {
     return ServiceApiResponse.success('로그인 성공', response);
   }
 
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth()
-  @Get('profile')
-  getProfile(@Req() req: Request): null {
-    console.log(req.member);
-
-    return null;
-  }
-
   @Post('/logout')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
   @ApiServiceResponse()
-  async logout(): Promise<ServiceApiResponse<null>> {
-    await this.authService.logout();
+  async logout(
+    @Req() req: Request,
+    @Body() logoutRequest: LogoutRequest,
+  ): Promise<ServiceApiResponse<null>> {
+    const { sub: memberId } = req.member;
+    const { refreshToken } = logoutRequest;
+
+    await this.authService.logout({ memberId, refreshToken });
+
     return ServiceApiResponse.success('로그아웃 성공');
   }
 
