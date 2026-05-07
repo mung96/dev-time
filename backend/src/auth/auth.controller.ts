@@ -3,13 +3,11 @@ import { AuthService } from './auth.service';
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   HttpStatus,
   Post,
   Req,
   UseGuards,
-  Headers,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ApiServiceResponse } from 'src/global/api-service-response.decorator';
@@ -37,13 +35,6 @@ export class AuthController {
     const response = await this.authService.login({ email, password });
 
     return ServiceApiResponse.success('로그인 성공', response);
-  }
-
-  @Get('profile')
-  getProfile(@Req() req: Request): null {
-    console.log(req.member);
-
-    return null;
   }
 
   @Post('/logout')

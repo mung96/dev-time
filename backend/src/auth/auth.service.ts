@@ -1,4 +1,3 @@
-import { MemberSession } from 'src/member/member-session.entity';
 import { MemberSessionRepository } from 'src/member/member-session.repository';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
