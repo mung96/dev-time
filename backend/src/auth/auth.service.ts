@@ -1,5 +1,5 @@
 import { MemberSessionRepository } from 'src/member/member-session.repository';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LoginResponse } from 'src/auth/login-response';
 import { InvalidCredentialsException } from 'src/common/exception/invalid-credentials.exception';
@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Member } from 'src/member/member.entity';
 import { MoreThan } from 'typeorm';
 import { MemberSession } from 'src/member/member-session.entity';
+import { JwtPayload } from 'src/types/jwt-payload';
 
 @Injectable()
 export class AuthService {
@@ -129,9 +130,15 @@ export class AuthService {
   }: {
     refreshToken: string;
   }): Promise<string> {
-    const memberSessions = await this.memberSessionRepository.find({
-      where: { expiredAt: MoreThan(new Date()) },
-      relations: { member: true },
+    const { sub: memberId } = await this.jwtService
+      .verifyAsync<JwtPayload>(refreshToken)
+      .catch(() => {
+        throw new UnauthorizedException('유효하지 않은 refreshToken입니다.');
+      });
+
+    const memberSessions = await this.memberSessionRepository.findBy({
+      member: { id: memberId },
+      expiredAt: MoreThan(new Date()),
     });
 
     let curMemberSession: MemberSession | null = null;
@@ -141,10 +148,12 @@ export class AuthService {
         break;
       }
     }
-    if (!curMemberSession) throw new Error('refreshToken 이상');
+    if (!curMemberSession)
+      throw new UnauthorizedException(
+        '세션이 만료되었습니다. 다시 로그인해 주세요.',
+      );
 
-    const payload = { sub: curMemberSession.member.id };
-
+    const payload = { sub: memberId };
     const newAccessToken = await this.jwtService.signAsync(payload, {
       expiresIn: this.accessTokenExpiredSec,
     });
