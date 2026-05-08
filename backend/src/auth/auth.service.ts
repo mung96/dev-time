@@ -132,10 +132,7 @@ export class AuthService {
       });
 
     // 로그아웃한 유저인지 판단
-    const memberSessions = await this.memberSessionRepository.findBy({
-      member: { id: memberId },
-      expiredAt: MoreThan(new Date()),
-    });
+    const memberSessions = await this.findActiveSessionsBy({ memberId });
 
     let curMemberSession: MemberSession | null = null;
     for (const memberSession of memberSessions) {
