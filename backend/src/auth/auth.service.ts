@@ -57,9 +57,8 @@ export class AuthService {
     }
 
     // 중복 로그인 체크
-    const activeSessions = await this.memberSessionRepository.findBy({
-      member: { id: member.id },
-      expiredAt: MoreThan(new Date()),
+    const activeSessions = await this.findActiveSessionsBy({
+      memberId: member.id,
     });
     const activeSessionIds = activeSessions.map((session) => session.id);
 
@@ -109,9 +108,8 @@ export class AuthService {
     memberId: number;
     refreshToken: string;
   }) {
-    const memberSessions = await this.memberSessionRepository.findBy({
-      member: { id: memberId },
-      expiredAt: MoreThan(new Date()),
+    const memberSessions = await this.findActiveSessionsBy({
+      memberId,
     });
 
     const memberSessionIds: number[] = [];
@@ -130,12 +128,14 @@ export class AuthService {
   }: {
     refreshToken: string;
   }): Promise<string> {
+    // refreshToken 검증
     const { sub: memberId } = await this.jwtService
       .verifyAsync<JwtPayload>(refreshToken)
       .catch(() => {
         throw new UnauthorizedException('유효하지 않은 refreshToken입니다.');
       });
 
+    // 로그아웃한 유저인지 판단
     const memberSessions = await this.memberSessionRepository.findBy({
       member: { id: memberId },
       expiredAt: MoreThan(new Date()),
@@ -153,10 +153,22 @@ export class AuthService {
         '세션이 만료되었습니다. 다시 로그인해 주세요.',
       );
 
+    // accessToken 새로 발급
     const payload = { sub: memberId };
     const newAccessToken = await this.jwtService.signAsync(payload, {
       expiresIn: this.accessTokenExpiredSec,
     });
     return newAccessToken;
+  }
+
+  private async findActiveSessionsBy({
+    memberId,
+  }: {
+    memberId: number;
+  }): Promise<MemberSession[]> {
+    return await this.memberSessionRepository.findBy({
+      member: { id: memberId },
+      expiredAt: MoreThan(new Date()),
+    });
   }
 }
