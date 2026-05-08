@@ -72,12 +72,8 @@ export class AuthService {
 
     // access, refresh를 발급한다.
     const payload = { sub: member.id };
-    const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: this.accessTokenExpiredSec,
-    });
-    const refreshToken = await this.jwtService.signAsync(payload, {
-      expiresIn: this.refreshTokenExpiredSec,
-    });
+    const accessToken = await this.generateNewAccessToken({ payload });
+    const refreshToken = await this.generateNewRefreshToken({ payload });
 
     // db에 refresh insert
     const hashedRefreshToken = await hash(refreshToken, 10);
@@ -155,9 +151,8 @@ export class AuthService {
 
     // accessToken 새로 발급
     const payload = { sub: memberId };
-    const newAccessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: this.accessTokenExpiredSec,
-    });
+    const newAccessToken = await this.generateNewAccessToken({ payload });
+
     return newAccessToken;
   }
 
@@ -169,6 +164,26 @@ export class AuthService {
     return await this.memberSessionRepository.findBy({
       member: { id: memberId },
       expiredAt: MoreThan(new Date()),
+    });
+  }
+
+  private async generateNewAccessToken({
+    payload,
+  }: {
+    payload: JwtPayload;
+  }): Promise<string> {
+    return await this.jwtService.signAsync(payload, {
+      expiresIn: this.accessTokenExpiredSec,
+    });
+  }
+
+  private async generateNewRefreshToken({
+    payload,
+  }: {
+    payload: JwtPayload;
+  }): Promise<string> {
+    return await this.jwtService.signAsync(payload, {
+      expiresIn: this.refreshTokenExpiredSec,
     });
   }
 }
