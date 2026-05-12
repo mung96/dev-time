@@ -59,8 +59,11 @@ export class AuthController {
   @ApiServiceResponse(RefreshAccessTokenResponse)
   async refreshAccessToken(
     @Body() refreshAccessTokenRequest: RefreshAccessTokenRequest,
-  ): Promise<ServiceApiResponse<null>> {
-    await this.authService.refreshAccessToken();
-    return ServiceApiResponse.success('토큰 교체 성공');
+  ): Promise<ServiceApiResponse<RefreshAccessTokenResponse>> {
+    const { refreshToken } = refreshAccessTokenRequest;
+    const accessToken = await this.authService.refreshAccessToken({
+      refreshToken,
+    });
+    return ServiceApiResponse.success('토큰 교체 성공', { accessToken });
   }
 }

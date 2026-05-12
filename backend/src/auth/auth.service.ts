@@ -1,5 +1,5 @@
 import { MemberSessionRepository } from 'src/member/member-session.repository';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LoginResponse } from 'src/auth/login-response';
 import { InvalidCredentialsException } from 'src/common/exception/invalid-credentials.exception';
@@ -8,6 +8,8 @@ import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { Member } from 'src/member/member.entity';
 import { MoreThan } from 'typeorm';
+import { MemberSession } from 'src/member/member-session.entity';
+import { JwtPayload } from 'src/types/jwt-payload';
 
 @Injectable()
 export class AuthService {
@@ -55,9 +57,8 @@ export class AuthService {
     }
 
     // 중복 로그인 체크
-    const activeSessions = await this.memberSessionRepository.findBy({
-      member: { id: member.id },
-      expiredAt: MoreThan(new Date()),
+    const activeSessions = await this.findActiveSessionsBy({
+      memberId: member.id,
     });
     const activeSessionIds = activeSessions.map((session) => session.id);
 
@@ -71,12 +72,8 @@ export class AuthService {
 
     // access, refresh를 발급한다.
     const payload = { sub: member.id };
-    const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: this.accessTokenExpiredSec,
-    });
-    const refreshToken = await this.jwtService.signAsync(payload, {
-      expiresIn: this.refreshTokenExpiredSec,
-    });
+    const accessToken = await this.generateNewAccessToken({ payload });
+    const refreshToken = await this.generateNewRefreshToken({ payload });
 
     // db에 refresh insert
     const hashedRefreshToken = await hash(refreshToken, 10);
@@ -107,9 +104,8 @@ export class AuthService {
     memberId: number;
     refreshToken: string;
   }) {
-    const memberSessions = await this.memberSessionRepository.findBy({
-      member: { id: memberId },
-      expiredAt: MoreThan(new Date()),
+    const memberSessions = await this.findActiveSessionsBy({
+      memberId,
     });
 
     const memberSessionIds: number[] = [];
@@ -123,5 +119,68 @@ export class AuthService {
     await this.memberSessionRepository.softDelete(memberSessionIds);
   }
 
-  async refreshAccessToken() {}
+  async refreshAccessToken({
+    refreshToken,
+  }: {
+    refreshToken: string;
+  }): Promise<string> {
+    // refreshToken 검증
+    const { sub: memberId } = await this.jwtService
+      .verifyAsync<JwtPayload>(refreshToken)
+      .catch(() => {
+        throw new UnauthorizedException('유효하지 않은 refreshToken입니다.');
+      });
+
+    // 로그아웃한 유저인지 판단
+    const memberSessions = await this.findActiveSessionsBy({ memberId });
+
+    let curMemberSession: MemberSession | null = null;
+    for (const memberSession of memberSessions) {
+      if (await compare(refreshToken, memberSession.refreshToken)) {
+        curMemberSession = memberSession;
+        break;
+      }
+    }
+    if (!curMemberSession)
+      throw new UnauthorizedException(
+        '세션이 만료되었습니다. 다시 로그인해 주세요.',
+      );
+
+    // accessToken 새로 발급
+    const payload = { sub: memberId };
+    const newAccessToken = await this.generateNewAccessToken({ payload });
+
+    return newAccessToken;
+  }
+
+  private async findActiveSessionsBy({
+    memberId,
+  }: {
+    memberId: number;
+  }): Promise<MemberSession[]> {
+    return await this.memberSessionRepository.findBy({
+      member: { id: memberId },
+      expiredAt: MoreThan(new Date()),
+    });
+  }
+
+  private async generateNewAccessToken({
+    payload,
+  }: {
+    payload: JwtPayload;
+  }): Promise<string> {
+    return await this.jwtService.signAsync(payload, {
+      expiresIn: this.accessTokenExpiredSec,
+    });
+  }
+
+  private async generateNewRefreshToken({
+    payload,
+  }: {
+    payload: JwtPayload;
+  }): Promise<string> {
+    return await this.jwtService.signAsync(payload, {
+      expiresIn: this.refreshTokenExpiredSec,
+    });
+  }
 }
